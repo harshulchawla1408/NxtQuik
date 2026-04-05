@@ -32,12 +32,12 @@ const categories = [
   {
     title: "Backend Development",
     glow: "glow-purple",
-    items: ["Node.js", "Express.js", "REST API", "GraphQL", "WebSockets", "gRPC"],
+    items: ["Node.js", "Express.js", "REST API", "GraphQL", "WebSockets"],
   },
   {
     title: "Databases",
     glow: "glow-blue",
-    items: ["PostgreSQL", "MySQL", "MongoDB", "Firebase Firestore", "Supabase", "Redis"],
+    items: ["PostgreSQL", "MySQL", "MongoDB", "Firebase Firestore", "Supabase"],
   },
   {
     title: "Cloud & Hosting",

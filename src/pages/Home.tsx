@@ -13,12 +13,13 @@ import {
 import { useScrollAnimation, useCountUp } from "@/hooks/useScrollAnimation";
 import logo from "@/assets/logo-nxtquik.jpg";
 import { useState } from "react";
+import TechIconComponent from "@/components/TechIcon";
 
 const stats = [
-  { label: "Projects Delivered", value: 25, suffix: "+" },
-  { label: "Happy Clients", value: 15, suffix: "+" },
+  { label: "Projects Delivered", value: 35, suffix: "+" },
+  { label: "Happy Clients", value: 20, suffix: "+" },
   { label: "Team Members", value: 10, suffix: "+" },
-  { label: "Years Experience", value: 3, suffix: "+" },
+  { label: "Years Experience", value: 1, suffix: "+" },
 ];
 
 const services = [
@@ -62,13 +63,23 @@ const testimonials = [
 ];
 
 const techPreview = [
-  "React", "Next.js", "TypeScript", "Tailwind CSS", "Node.js", "Supabase",
-  "PostgreSQL", "Vercel", "Firebase", "Docker", "Figma", "Cloudflare",
+  { name: "React", iconName: "React.js" },
+  { name: "Next.js", iconName: "Next.js" },
+  { name: "TypeScript", iconName: "TypeScript" },
+  { name: "Tailwind CSS", iconName: "Tailwind CSS" },
+  { name: "Node.js", iconName: "Node.js" },
+  { name: "Supabase", iconName: "Supabase" },
+  { name: "PostgreSQL", iconName: "PostgreSQL" },
+  { name: "Vercel", iconName: "Vercel" },
+  { name: "Firebase", iconName: "Firebase Firestore" },
+  { name: "Docker", iconName: "Docker" },
+  { name: "Figma", iconName: "Figma" },
+  { name: "Cloudflare", iconName: "Cloudflare" },
 ];
 
 const faqs = [
   { q: "What services does NxtQuik offer?", a: "We offer web development, app development, custom software, cloud solutions, digital marketing, branding, graphic design, and creative content services including wedding videography and photography." },
-  { q: "How long does a typical project take?", a: "Project timelines vary based on complexity. A standard website takes 2-4 weeks, while complex applications may take 2-3 months. We always provide detailed timelines during the discovery phase." },
+  { q: "How long does a typical project take?", a: "Project timelines vary based on complexity. A standard website takes 2-3 weeks, while complex applications may take 5-6 weeks. We always provide detailed timelines during the discovery phase." },
   { q: "Do you offer ongoing support?", a: "Yes! We provide post-launch support, maintenance, and optimization services to ensure your digital products continue to perform at their best." },
   { q: "What is your pricing model?", a: "We offer flexible pricing based on project scope — fixed-price for well-defined projects and time & material for evolving requirements. Schedule a meeting for a custom quote." },
 ];
@@ -102,15 +113,11 @@ const FAQItem = ({ q, a }: { q: string; a: string }) => {
 const HomePage = () => (
   <Layout>
     {/* Hero */}
-    <section className="relative">
+    <section className="relative flex flex-col min-h-screen pb-12 pt-8 md:pt-12">
       <HeroAnimation />
-      <div className="absolute bottom-0 left-0 right-0 z-20 pb-12">
+      <div className="relative z-20 pb-4 mt-8 md:mt-12 w-full">
         <div className="container mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 mb-6 text-sm text-muted-foreground">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            Available for new projects
-          </div>
-          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+          <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 font-medium">
             We blend cutting-edge technology with artistic creativity to deliver outstanding digital experiences for brands worldwide.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -201,8 +208,11 @@ const HomePage = () => (
         </div>
         <div className="flex flex-wrap justify-center gap-3 mb-8">
           {techPreview.map((t) => (
-            <span key={t} className="glass rounded-full px-5 py-2.5 text-sm font-medium text-foreground border border-border/30 hover:glow-blue hover:border-primary/30 transition-all duration-300 cursor-default">
-              {t}
+            <span key={t.name} className="glass flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium text-foreground border border-border/30 hover:glow-blue hover:border-primary/30 transition-all duration-300 cursor-default">
+              <div className="w-5 h-5 [&>svg]:w-full [&>svg]:h-full">
+                <TechIconComponent name={t.iconName} />
+              </div>
+              {t.name}
             </span>
           ))}
         </div>
