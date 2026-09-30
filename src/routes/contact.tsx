@@ -1,7 +1,7 @@
-import { pageHead } from "@/lib/seo";
+import { pageHead, breadcrumbs, getSiteUrl } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Mail, MapPin, Phone, ArrowRight } from "lucide-react";
+import { Mail, MapPin, Phone, ArrowRight, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
@@ -12,15 +12,48 @@ import { useServerFn } from "@tanstack/react-start";
 import { sendEnquiry as sendEnquiryFn } from "@/lib/contact.functions";
 
 export const Route = createFileRoute("/contact")({
-  head: () =>
-    pageHead({
-      title: "Contact NxtQuik — Start a Project",
+  head: () => ({
+    ...pageHead({
+      title: "Contact NxtQuik — Start a Project | Web, Software & Growth",
       description:
-        "Start a project with NxtQuik. Email nxtquik@gmail.com, call +91 94786 69360, or send your brief through the enquiry form.",
+        "Get in touch with NxtQuik. Email nxtquik@gmail.com, call +91 94786 69360, or submit your project brief for custom web, mobile, software or growth solutions.",
       path: "/contact",
     }),
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ContactPage",
+          name: "Contact NxtQuik",
+          url: `${getSiteUrl()}/contact`,
+          description:
+            "Start a technology, software, cloud or digital growth project with NxtQuik.",
+          mainEntity: {
+            "@type": "Organization",
+            name: "NxtQuik",
+            email: site.email,
+            telephone: site.phone,
+            address: {
+              "@type": "PostalAddress",
+              addressLocality: "Patiala",
+              addressRegion: "Punjab",
+              addressCountry: "IN",
+            },
+          },
+        }),
+      },
+      breadcrumbs([
+        { name: "Home", path: "/" },
+        { name: "Contact", path: "/contact" },
+      ]),
+    ],
+  }),
   component: Contact,
 });
+
+const SUCCESS_MESSAGE =
+  "Thank you for reaching out to NxtQuik. We've received your enquiry and will get back to you shortly.";
 
 function Contact() {
   const [sent, setSent] = useState(false);
@@ -106,73 +139,132 @@ function Contact() {
                 <p className="mt-2 text-sm text-muted-foreground">
                   Share a few details and we'll come back with next steps.
                 </p>
-                <form
-                  className="mt-8 space-y-5"
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    const form = e.currentTarget;
-                    const fd = Object.fromEntries(new FormData(form)) as Record<string, string>;
-                    setSending(true);
-                    try {
-                      await sendEnquiry({ data: fd });
-                      setSent(true);
-                      form.reset();
-                      toast.success("Thanks — we'll be in touch shortly.");
-                    } catch {
-                      toast.error(`Couldn't send right now. Please email us at ${site.email}.`);
-                    } finally {
-                      setSending(false);
-                    }
-                  }}
-                >
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <Field label="Name" name="name" required />
-                    <Field label="Email" name="email" type="email" required />
+
+                {sent ? (
+                  <div className="mt-8 rounded-xl border border-primary/20 bg-primary/5 p-6 text-foreground">
+                    <div className="flex items-start gap-4">
+                      <CheckCircle2 className="mt-0.5 size-6 shrink-0 text-primary" />
+                      <div>
+                        <h3 className="text-lg font-semibold">Enquiry Received</h3>
+                        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                          {SUCCESS_MESSAGE}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setSent(false)}
+                          className="btn-base btn-outline mt-6 !px-4 !py-2 !text-xs"
+                        >
+                          Send another message
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <Field label="Company" name="company" />
+                ) : (
+                  <form
+                    className="mt-8 space-y-5"
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      const form = e.currentTarget;
+                      const fd = Object.fromEntries(new FormData(form)) as Record<string, string>;
+
+                      // Client-side validation
+                      const name = fd["name"]?.trim() || "";
+                      const email = fd["email"]?.trim() || "";
+                      const message = fd["message"]?.trim() || "";
+
+                      if (name.length < 2) {
+                        toast.error("Please enter your name.");
+                        return;
+                      }
+
+                      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        toast.error("Please enter a valid email address.");
+                        return;
+                      }
+
+                      if (message.length < 5) {
+                        toast.error("Please enter a short message about your project.");
+                        return;
+                      }
+
+                      setSending(true);
+                      try {
+                        await sendEnquiry({ data: fd });
+                        setSent(true);
+                        form.reset();
+                        toast.success(SUCCESS_MESSAGE);
+                      } catch {
+                        toast.error(
+                          `Couldn't send right now. Please email us directly at ${site.email}.`,
+                        );
+                      } finally {
+                        setSending(false);
+                      }
+                    }}
+                  >
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <Field label="Your Name *" name="name" required placeholder="Shubham" />
+                      <Field
+                        label="Email Address *"
+                        name="email"
+                        type="email"
+                        required
+                        placeholder="you@company.com"
+                      />
+                    </div>
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <Field
+                        label="Phone Number"
+                        name="phone"
+                        type="tel"
+                        placeholder="+91 94786 69360"
+                      />
+                      <Field label="Company / Organisation" name="company" placeholder="Company Ltd" />
+                    </div>
                     <div>
                       <label htmlFor="service" className="text-sm font-medium">
-                        What do you need?
+                        What service are you interested in?
                       </label>
                       <select
                         id="service"
                         name="service"
-                        className="mt-2 w-full rounded-lg border border-input bg-background px-4 py-3 text-sm"
+                        className="mt-2 w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       >
                         {services.map((s) => (
-                          <option key={s.slug}>{s.name}</option>
+                          <option key={s.slug} value={s.name}>
+                            {s.name}
+                          </option>
                         ))}
-                        <option>Something else</option>
+                        <option value="Something else">Something else</option>
                       </select>
                     </div>
-                  </div>
-                  <div>
-                    <label htmlFor="message" className="text-sm font-medium">
-                      Project brief
-                    </label>
-                    <textarea
-                      id="message"
-                      name="message"
-                      rows={5}
-                      required
-                      className="mt-2 w-full rounded-lg border border-input bg-background px-4 py-3 text-sm"
-                      placeholder="Where are you today, and what needs to change?"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={sending}
-                    className="btn-base btn-primary w-full disabled:opacity-60"
-                  >
-                    {sending ? "Sending…" : "Send enquiry"} <ArrowRight className="size-4" />
-                  </button>
-                  {sent && (
-                    <p className="text-sm text-muted-foreground">
-                      Message received — we usually reply within one business day.
+                    <div>
+                      <label htmlFor="message" className="text-sm font-medium">
+                        Project Brief / Message *
+                      </label>
+                      <textarea
+                        id="message"
+                        name="message"
+                        rows={5}
+                        required
+                        minLength={5}
+                        className="mt-2 w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="Tell us where you are today, what you're building, and your target timeline."
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={sending}
+                      className="btn-base btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {sending ? "Sending enquiry…" : "Send enquiry"}{" "}
+                      <ArrowRight className="size-4" />
+                    </button>
+                    <p className="text-center text-xs text-muted-foreground">
+                      We respond directly within one business day. Your data is kept strictly confidential.
                     </p>
-                  )}
-                </form>
+                  </form>
+                )}
               </div>
             </Reveal>
           </div>
@@ -188,11 +280,13 @@ function Field({
   name,
   type = "text",
   required,
+  placeholder,
 }: {
   label: string;
   name: string;
   type?: string;
   required?: boolean;
+  placeholder?: string;
 }) {
   return (
     <div>
@@ -204,7 +298,8 @@ function Field({
         name={name}
         type={type}
         required={required}
-        className="mt-2 w-full rounded-lg border border-input bg-background px-4 py-3 text-sm"
+        placeholder={placeholder}
+        className="mt-2 w-full rounded-lg border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
       />
     </div>
   );

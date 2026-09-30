@@ -1,4 +1,4 @@
-import { pageHead } from "@/lib/seo";
+import { pageHead, breadcrumbs, getSiteUrl } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
@@ -10,13 +10,44 @@ import { Mark } from "@/components/site/Brand";
 import { site, processSteps } from "@/data/site";
 
 export const Route = createFileRoute("/about")({
-  head: () =>
-    pageHead({
-      title: "About NxtQuik — Technology & Growth",
+  head: () => ({
+    ...pageHead({
+      title: "About NxtQuik — Technology, Engineering & Growth Company",
       description:
-        "NxtQuik is a technology, digital transformation and growth company from Patiala, founded by Shubham Sonwal, helping businesses build scalable digital foundations.",
+        "NxtQuik is a technology, digital transformation and growth agency from Patiala, founded by Shubham Sonwal, building scalable software, cloud systems and digital products.",
       path: "/about",
     }),
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          name: "About NxtQuik",
+          url: `${getSiteUrl()}/about`,
+          description:
+            "NxtQuik helps businesses use technology, custom engineering and digital growth strategies to build scalable operations.",
+          mainEntity: {
+            "@type": "Organization",
+            name: "NxtQuik",
+            founder: { "@type": "Person", name: site.founder },
+            email: site.email,
+            telephone: site.phone,
+            address: {
+              "@type": "PostalAddress",
+              addressLocality: "Patiala",
+              addressRegion: "Punjab",
+              addressCountry: "IN",
+            },
+          },
+        }),
+      },
+      breadcrumbs([
+        { name: "Home", path: "/" },
+        { name: "About", path: "/about" },
+      ]),
+    ],
+  }),
   component: About,
 });
 

@@ -1,4 +1,4 @@
-import { pageHead } from "@/lib/seo";
+import { pageHead, breadcrumbs, getSiteUrl } from "@/lib/seo";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 import { Nav } from "@/components/site/Nav";
@@ -9,13 +9,34 @@ import { CtaSection } from "@/components/site/CtaSection";
 import { services, serviceCategories } from "@/data/services";
 
 export const Route = createFileRoute("/services/")({
-  head: () =>
-    pageHead({
-      title: "NxtQuik Services — Technology, Software & Digital Growth",
+  head: () => ({
+    ...pageHead({
+      title: "Services & Capabilities — Web, App, Software, Cloud & SEO | NxtQuik",
       description:
-        "Explore NxtQuik's technology, software development, cloud transformation, SEO, digital marketing and growth services.",
+        "Full-cycle digital product and growth services: custom web and app development, enterprise software, cloud solutions, technical SEO, and performance marketing.",
       path: "/services",
     }),
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "NxtQuik Technology & Growth Services",
+          itemListElement: services.map((s, idx) => ({
+            "@type": "ListItem",
+            position: idx + 1,
+            name: s.name,
+            url: `${getSiteUrl()}/services/${s.slug}`,
+          })),
+        }),
+      },
+      breadcrumbs([
+        { name: "Home", path: "/" },
+        { name: "Services", path: "/services" },
+      ]),
+    ],
+  }),
   component: ServicesIndex,
 });
 

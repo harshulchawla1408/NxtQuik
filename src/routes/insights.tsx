@@ -1,4 +1,4 @@
-import { pageHead } from "@/lib/seo";
+import { pageHead, breadcrumbs, getSiteUrl } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
@@ -8,13 +8,31 @@ import { CtaSection } from "@/components/site/CtaSection";
 import { insights } from "@/data/site";
 
 export const Route = createFileRoute("/insights")({
-  head: () =>
-    pageHead({
-      title: "NxtQuik Insights — Technology, Cloud, SEO & Growth",
+  head: () => ({
+    ...pageHead({
+      title: "Technology & Growth Insights — Architecture, Cloud, SEO | NxtQuik",
       description:
-        "Practical writing on technology, cloud, software, web development, SEO, digital marketing and business growth from the NxtQuik team.",
+        "Practical engineering and growth insights on web development, custom software, cloud solutions, conversion optimization, and lead generation.",
       path: "/insights",
     }),
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Blog",
+          name: "NxtQuik Insights",
+          url: `${getSiteUrl()}/insights`,
+          description:
+            "Practical notes on technology, cloud architecture, software engineering, and digital growth from the NxtQuik team.",
+        }),
+      },
+      breadcrumbs([
+        { name: "Home", path: "/" },
+        { name: "Insights", path: "/insights" },
+      ]),
+    ],
+  }),
   component: Insights,
 });
 

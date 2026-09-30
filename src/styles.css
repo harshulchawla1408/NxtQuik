@@ -708,16 +708,41 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .orbit-ring,
+  .orbit-chip,
+  .orbit-core,
+  .marquee-track,
+  .data-pulse,
+  .data-pulse-head,
   .office-anim * {
     animation: none !important;
   }
+
+  .marquee-track {
+    transform: none !important;
+  }
+
   .office-anim .oi-wire path,
   .office-anim .oi-wire rect {
     stroke-dasharray: none;
     opacity: 0.4;
   }
+
   .office-anim .oi-marks,
   .office-anim .oi-energy {
     opacity: 0;
   }
 }
+

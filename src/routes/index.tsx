@@ -46,41 +46,65 @@ import { HeroVisual } from "@/components/site/HeroVisual";
 import { services, serviceCategories, solutions } from "@/data/services";
 import { site, projects, processSteps, insights } from "@/data/site";
 
+import { getSiteUrl, absoluteUrl } from "@/lib/seo";
+
 export const Route = createFileRoute("/")({
-  head: () => ({
-    ...pageHead({
-      title: "NxtQuik — Technology, Transformation & Growth",
-      description:
-        "NxtQuik builds digital products, custom software, cloud solutions and growth systems that help ambitious businesses move forward.",
-      path: "/",
-    }),
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "ProfessionalService",
-          name: "NxtQuik",
-          description:
-            "Technology, digital transformation and growth company: web, app and custom software development, cloud, consulting, SEO and digital marketing.",
-          logo: "/apple-touch-icon.png",
-          email: "nxtquik@gmail.com",
-          telephone: "+91 94786 69360",
-          founder: { "@type": "Person", name: "Shubham Sonwal" },
-          address: {
-            "@type": "PostalAddress",
-            addressLocality: "Patiala",
-            addressRegion: "Punjab",
-            addressCountry: "IN",
-          },
-          sameAs: [
-            "https://www.linkedin.com/company/ugcnxtquik/",
-            "https://www.instagram.com/nxtquik/",
-          ],
-        }),
-      },
-    ],
-  }),
+  head: () => {
+    const siteUrl = getSiteUrl();
+    return {
+      ...pageHead({
+        title: "NxtQuik | Technology, Digital Transformation & Growth",
+        description:
+          "NxtQuik builds digital products, custom software, cloud solutions and growth systems that help ambitious businesses build, transform and grow.",
+        path: "/",
+      }),
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "WebSite",
+                "@id": `${siteUrl}/#website`,
+                url: siteUrl,
+                name: "NxtQuik",
+                description:
+                  "Technology, digital transformation and growth systems for modern businesses.",
+                publisher: {
+                  "@id": `${siteUrl}/#organization`,
+                },
+              },
+              {
+                "@type": ["Organization", "ProfessionalService"],
+                "@id": `${siteUrl}/#organization`,
+                name: "NxtQuik",
+                url: siteUrl,
+                logo: absoluteUrl("/apple-touch-icon.png"),
+                image: absoluteUrl("/og-image.png"),
+                email: "nxtquik@gmail.com",
+                telephone: "+91 94786 69360",
+                founder: {
+                  "@type": "Person",
+                  name: "Shubham Sonwal",
+                },
+                address: {
+                  "@type": "PostalAddress",
+                  addressLocality: "Patiala",
+                  addressRegion: "Punjab",
+                  addressCountry: "IN",
+                },
+                sameAs: [
+                  "https://www.linkedin.com/company/ugcnxtquik/",
+                  "https://www.instagram.com/nxtquik/",
+                ],
+              },
+            ],
+          }),
+        },
+      ],
+    };
+  },
   component: Home,
 });
 

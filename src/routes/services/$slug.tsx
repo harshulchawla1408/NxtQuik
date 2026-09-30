@@ -1,5 +1,5 @@
 import { serviceAliases, serviceTitles } from "@/data/services";
-import { pageHead, breadcrumbs } from "@/lib/seo";
+import { pageHead, breadcrumbs, serviceSchema } from "@/lib/seo";
 import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { ArrowRight, Check } from "lucide-react";
 import { Nav } from "@/components/site/Nav";
@@ -23,13 +23,21 @@ export const Route = createFileRoute("/services/$slug")({
         meta: [{ title: "Service not found | NxtQuik" }, { name: "robots", content: "noindex" }],
       };
     const path = `/services/${params.slug}`;
+    const title = serviceTitles[loaderData.slug] ?? `${loaderData.name} Services | NxtQuik`;
+    const description = `${loaderData.headline} ${loaderData.solution}`.slice(0, 158);
     return {
       ...pageHead({
-        title: serviceTitles[loaderData.slug] ?? `${loaderData.name} Services | NxtQuik`,
-        description: loaderData.solution.slice(0, 158),
+        title,
+        description,
         path,
       }),
       scripts: [
+        serviceSchema({
+          name: loaderData.name,
+          description: loaderData.solution,
+          path,
+          category: loaderData.category,
+        }),
         breadcrumbs([
           { name: "Home", path: "/" },
           { name: "Services", path: "/services" },
