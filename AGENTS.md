@@ -1,0 +1,3 @@
+- Page SEO goes through `pageHead()` in src/lib/seo.ts (title, description, OG/Twitter, relative canonical + og:url) — keeps metadata consistent per route.
+- Sitemap is a server route (src/routes/sitemap[.]xml.ts) built from data files and the request origin — no hardcoded domain until one is set.
+- Legacy/alias URLs 301 in route loaders (serviceAliases, /work/gabrulooks → /work/gabru-looks).
