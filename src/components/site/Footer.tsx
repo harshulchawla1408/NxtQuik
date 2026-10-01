@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { Wordmark } from "./Brand";
 import { site } from "@/data/site";
 
@@ -53,18 +53,19 @@ export function Footer() {
               <div key={col.title}>
                 <h3 className="eyebrow text-muted-foreground">{col.title}</h3>
                 <ul className="mt-4 space-y-2.5">
-                  {col.links.map((l) => (
-                    <li key={l.label}>
-                      <Link
-                        {...("slug" in l
-                          ? { to: "/services/$slug" as const, params: { slug: l.slug } }
-                          : { to: l.to })}
-                        className="text-sm text-muted-foreground transition-colors hover:text-primary"
-                      >
-                        {l.label}
-                      </Link>
-                    </li>
-                  ))}
+                  {col.links.map((l) => {
+                    const target = "slug" in l ? `/services/${l.slug}` : l.to;
+                    return (
+                      <li key={l.label}>
+                        <Link
+                          to={target}
+                          className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                        >
+                          {l.label}
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ))}

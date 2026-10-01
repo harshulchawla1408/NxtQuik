@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Reveal } from "./Reveal";
 
@@ -17,7 +17,7 @@ export function CtaSection() {
             <Link to="/contact" className="btn-base btn-primary">
               Start a Project <ArrowRight className="size-4" />
             </Link>
-            <Link to="/contact" hash="consultation" className="btn-base btn-onnavy">
+            <Link to="/contact#consultation" className="btn-base btn-onnavy">
               Book a Consultation
             </Link>
           </div>

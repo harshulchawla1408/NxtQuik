@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
@@ -129,7 +129,7 @@ function ProjectCard({ c }: { c: CaseStudy }) {
             {c.statement}
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link to="/work/$slug" params={{ slug: c.slug }} className="btn-base btn-primary">
+            <Link to={`/work/${c.slug}`} className="btn-base btn-primary">
               Explore {c.name} Case Study <ArrowRight className="size-4" />
             </Link>
             <a

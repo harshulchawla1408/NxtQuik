@@ -426,7 +426,7 @@ export const serviceAliases: Record<string, string> = {
   "cloud-digital-transformation": "cloud-solutions",
   "seo-digital-growth": "seo",
   "ui-ux-design": "ui-ux",
-  "uiux": "ui-ux",
+  uiux: "ui-ux",
   "ui-ux-development": "ui-ux",
   "e-commerce": "ecommerce",
   "ecommerce-development": "ecommerce",

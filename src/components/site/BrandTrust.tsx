@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { Reveal } from "./Reveal";
 import medimetics from "@/assets/brand-medimetics.png";
 import immortal from "@/assets/brand-immortal.png";
@@ -56,12 +56,7 @@ function Logo({ b }: { b: Brand }) {
     </span>
   );
   return b.slug ? (
-    <Link
-      to="/work/$slug"
-      params={{ slug: b.slug as "scalvea" }}
-      className={cls}
-      aria-label={`${b.name} project`}
-    >
+    <Link to={`/work/${b.slug}`} className={cls} aria-label={`${b.name} project`}>
       {inner}
       {tip}
     </Link>

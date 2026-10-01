@@ -1,11 +1,19 @@
+import { useEffect } from "react";
+
 export const SITE_NAME = "NxtQuik";
-export const DEFAULT_SITE_URL = "https://nxtquik.com";
+export const DEFAULT_SITE_URL = "https://www.nxtquik.com";
 export const OG_IMAGE = "/og-image.png";
 
 /**
  * Returns the configured production site URL or fallback.
  */
 export function getSiteUrl(): string {
+  if (typeof import.meta !== "undefined" && import.meta.env) {
+    const envUrl = import.meta.env.VITE_SITE_URL as string | undefined;
+    if (envUrl && typeof envUrl === "string") {
+      return envUrl.replace(/\/$/, "");
+    }
+  }
   if (typeof process !== "undefined" && process.env) {
     const envUrl = process.env["VITE_SITE_URL"] || process.env["SITE_URL"];
     if (envUrl && typeof envUrl === "string") {
@@ -34,74 +42,111 @@ export type PageMeta = {
   type?: "website" | "article";
   image?: string;
   noindex?: boolean;
+  schema?: Record<string, unknown> | Array<Record<string, unknown>>;
 };
 
 /**
- * Generates comprehensive, unique per-page SEO metadata adhering to Search Engine,
- * OpenGraph, and Twitter/X card standards with absolute canonical URLs.
+ * Client-side React hook to update page title, meta description, canonical link,
+ * OpenGraph, Twitter tags, and structured JSON-LD data on route change.
  */
-export function pageHead({
+export function useSEO({
   title,
   description,
   path,
   type = "website",
   image = OG_IMAGE,
   noindex = false,
+  schema,
 }: PageMeta) {
-  const canonicalUrl = absoluteUrl(path);
-  const imageUrl = absoluteUrl(image);
-  const robots = noindex
-    ? "noindex, nofollow"
-    : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
+  useEffect(() => {
+    // 1. Title
+    document.title = title;
 
-  return {
-    meta: [
-      { title },
-      { name: "description", content: description },
-      { name: "robots", content: robots },
-      { name: "googlebot", content: robots },
-      { name: "theme-color", content: "#080d1a" },
-      { property: "og:site_name", content: SITE_NAME },
-      { property: "og:title", content: title },
-      { property: "og:description", content: description },
-      { property: "og:type", content: type },
-      { property: "og:url", content: canonicalUrl },
-      { property: "og:image", content: imageUrl },
-      { property: "og:image:width", content: "1200" },
-      { property: "og:image:height", content: "630" },
-      { property: "og:image:alt", content: `${SITE_NAME} — Technology for What's Next.` },
-      { property: "og:locale", content: "en_US" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: title },
-      { name: "twitter:description", content: description },
-      { name: "twitter:image", content: imageUrl },
-      { name: "twitter:image:alt", content: `${SITE_NAME} — Technology for What's Next.` },
-    ],
-    links: [{ rel: "canonical", href: canonicalUrl }],
-  };
+    // Helper to set or create a meta tag
+    const setMeta = (attribute: string, key: string, content: string) => {
+      let el = document.querySelector(`meta[${attribute}="${key}"]`);
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute(attribute, key);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("content", content);
+    };
+
+    // Helper to set or create a link tag
+    const setLink = (rel: string, href: string) => {
+      let el = document.querySelector(`link[rel="${rel}"]`);
+      if (!el) {
+        el = document.createElement("link");
+        el.setAttribute("rel", rel);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("href", href);
+    };
+
+    const canonicalUrl = absoluteUrl(path);
+    const imageUrl = absoluteUrl(image);
+    const robots = noindex
+      ? "noindex, nofollow"
+      : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
+
+    // 2. Standard Meta
+    setMeta("name", "description", description);
+    setMeta("name", "robots", robots);
+    setMeta("name", "googlebot", robots);
+    setMeta("name", "theme-color", "#080d1a");
+
+    // 3. Canonical Link
+    setLink("canonical", canonicalUrl);
+
+    // 4. OpenGraph
+    setMeta("property", "og:site_name", SITE_NAME);
+    setMeta("property", "og:title", title);
+    setMeta("property", "og:description", description);
+    setMeta("property", "og:type", type);
+    setMeta("property", "og:url", canonicalUrl);
+    setMeta("property", "og:image", imageUrl);
+
+    // 5. Twitter Card
+    setMeta("name", "twitter:card", "summary_large_image");
+    setMeta("name", "twitter:title", title);
+    setMeta("name", "twitter:description", description);
+    setMeta("name", "twitter:image", imageUrl);
+
+    // 6. JSON-LD Schema (if provided)
+    let scriptEl = document.getElementById("page-structured-data") as HTMLScriptElement | null;
+    if (schema) {
+      if (!scriptEl) {
+        scriptEl = document.createElement("script");
+        scriptEl.id = "page-structured-data";
+        scriptEl.type = "application/ld+json";
+        document.head.appendChild(scriptEl);
+      }
+      scriptEl.textContent = JSON.stringify(schema);
+    } else if (scriptEl) {
+      scriptEl.remove();
+    }
+  }, [title, description, path, type, image, noindex, schema]);
 }
 
 /**
- * Structured BreadcrumbList schema (JSON-LD)
+ * Structured BreadcrumbList schema helper (JSON-LD)
  */
 export function breadcrumbs(items: { name: string; path: string }[]) {
   return {
-    type: "application/ld+json",
-    children: JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: items.map((it, i) => ({
-        "@type": "ListItem",
-        position: i + 1,
-        name: it.name,
-        item: absoluteUrl(it.path),
-      })),
-    }),
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((it, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: it.name,
+      item: absoluteUrl(it.path),
+    })),
   };
 }
 
 /**
- * Structured Service schema (JSON-LD)
+ * Structured Service schema helper (JSON-LD)
  */
 export function serviceSchema({
   name,
@@ -115,27 +160,24 @@ export function serviceSchema({
   category?: string;
 }) {
   return {
-    type: "application/ld+json",
-    children: JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Service",
-      name,
-      description,
-      serviceType: category || name,
-      provider: {
-        "@type": "ProfessionalService",
-        name: SITE_NAME,
-        url: getSiteUrl(),
-        telephone: "+91 94786 69360",
-        email: "nxtquik@gmail.com",
-        address: {
-          "@type": "PostalAddress",
-          addressLocality: "Patiala",
-          addressRegion: "Punjab",
-          addressCountry: "IN",
-        },
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name,
+    description,
+    serviceType: category || name,
+    provider: {
+      "@type": "ProfessionalService",
+      name: SITE_NAME,
+      url: getSiteUrl(),
+      telephone: "+91 94786 69360",
+      email: "nxtquik@gmail.com",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Patiala",
+        addressRegion: "Punjab",
+        addressCountry: "IN",
       },
-      url: absoluteUrl(path),
-    }),
+    },
+    url: absoluteUrl(path),
   };
 }

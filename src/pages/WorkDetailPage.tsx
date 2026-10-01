@@ -1,7 +1,6 @@
-import { pageHead, breadcrumbs } from "@/lib/seo";
-import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
-import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
+import { useParams, Navigate, Link } from "react-router-dom";
+import { motion, useScroll, useTransform } from "motion/react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
@@ -10,38 +9,65 @@ import { CtaSection } from "@/components/site/CtaSection";
 import { DataPulses } from "@/components/site/DataPulses";
 import { ProjectVisual } from "@/components/site/SelectedWork";
 import { caseStudies, type CaseStudy } from "@/data/caseStudies";
+import { useSEO, breadcrumbs } from "@/lib/seo";
+import { NotFoundPage } from "./NotFoundPage";
 
-export const Route = createFileRoute("/work/$slug")({
-  loader: ({ params }) => {
-    if (params.slug === "gabrulooks")
-      throw redirect({ to: "/work/$slug", params: { slug: "gabru-looks" }, statusCode: 301 });
-    const c = caseStudies[params.slug as CaseStudy["slug"]];
-    if (!c) throw notFound();
-    return c;
-  },
-  head: ({ loaderData: c, params }) => {
-    if (!c)
-      return {
-        meta: [{ title: "Case study not found | NxtQuik" }, { name: "robots", content: "noindex" }],
-      };
-    const path = `/work/${params.slug}`;
-    const title =
-      c.slug === "scalvea"
-        ? "NxtQuik × Scalvea — E-Commerce & Digital Growth Case Study"
-        : "NxtQuik × Gabru Looks — Salon Technology Case Study";
-    return {
-      ...pageHead({ title, description: c.description.slice(0, 158), path, type: "article" }),
-      scripts: [
+function VerticalFlow({ steps }: { steps: CaseStudy["approach"] }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 75%", "end 55%"] });
+  const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+  return (
+    <div ref={ref} className="relative">
+      <div className="absolute bottom-4 left-4 top-4 hidden w-px bg-border md:block">
+        <motion.div
+          style={{ scaleY }}
+          className="h-full w-full origin-top bg-gradient-to-b from-primary via-[color-mix(in_oklab,var(--cyan)_75%,white)] to-primary"
+        />
+      </div>
+
+      <div className="space-y-6 md:space-y-8 md:pl-12">
+        {steps.map((st, i) => (
+          <Reveal key={st.step} delay={i * 0.08}>
+            <div className="card-premium relative rounded-2xl p-6 md:p-8">
+              <span className="hidden size-8 -translate-x-[calc(3rem+1rem)] items-center justify-center rounded-full border border-border bg-background font-mono text-xs font-semibold text-primary shadow-sm md:absolute md:top-8 md:flex">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <p className="eyebrow text-primary">
+                Layer {String(i + 1).padStart(2, "0")} · {st.step}
+              </p>
+              <h3 className="mt-2 text-xl font-semibold md:text-2xl">{st.action}</h3>
+              <p className="mt-3 text-sm text-muted-foreground">{st.detail}</p>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function WorkDetailContent({ c, next }: { c: CaseStudy; next: CaseStudy }) {
+  const salon = c.slug === "gabru-looks";
+  const title =
+    c.slug === "scalvea"
+      ? "NxtQuik × Scalvea — E-Commerce & Digital Growth Case Study"
+      : "NxtQuik × Gabru Looks — Salon Technology Case Study";
+  const path = `/work/${c.slug}`;
+
+  useSEO({
+    title,
+    description: c.description.slice(0, 158),
+    path,
+    type: "article",
+    schema: {
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          type: "application/ld+json",
-          children: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "CreativeWork",
-            name: title,
-            about: { "@type": "Organization", name: c.name, url: c.url },
-            creator: { "@type": "Organization", name: "NxtQuik" },
-            description: c.description,
-          }),
+          "@type": "CreativeWork",
+          name: title,
+          about: { "@type": "Organization", name: c.name, url: c.url },
+          creator: { "@type": "Organization", name: "NxtQuik" },
+          description: c.description,
         },
         breadcrumbs([
           { name: "Home", path: "/" },
@@ -49,43 +75,8 @@ export const Route = createFileRoute("/work/$slug")({
           { name: c.name, path },
         ]),
       ],
-    };
-  },
-  component: CasePage,
-});
-
-function VerticalFlow({ steps }: { steps: CaseStudy["approach"] }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 75%", "end 55%"] });
-  const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  return (
-    <div ref={ref} className="relative pl-10">
-      <div className="absolute bottom-2 left-[11px] top-2 w-px bg-[color-mix(in_oklab,var(--primary)_20%,transparent)]" />
-      <motion.div
-        style={{ scaleY }}
-        className="absolute bottom-2 left-[11px] top-2 w-px origin-top bg-[linear-gradient(180deg,var(--primary),var(--cyan))] shadow-[0_0_10px_var(--cyan)]"
-      />
-      <ol className="space-y-10">
-        {steps.map((s, i) => (
-          <li key={s.title} className="relative">
-            <span className="absolute -left-10 top-1 grid size-6 place-items-center rounded-full border border-primary bg-background text-[10px] font-bold text-primary">
-              {i + 1}
-            </span>
-            <h3 className="text-2xl font-semibold uppercase tracking-tight md:text-3xl">
-              {s.title}
-            </h3>
-            <p className="mt-2 max-w-xl text-muted-foreground">{s.body}</p>
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-}
-
-function CasePage() {
-  const c = Route.useLoaderData();
-  const next = caseStudies[c.next];
-  const salon = c.slug === "gabru-looks";
+    },
+  });
 
   return (
     <div>
@@ -96,7 +87,10 @@ function CasePage() {
           <div className="rule-grid absolute inset-0 opacity-25" aria-hidden />
           <DataPulses />
           <div className="relative mx-auto max-w-7xl px-5 pb-20 pt-36 md:px-8 md:pb-28 md:pt-44">
-            <Link to="/work" className="text-sm text-navy-muted hover:text-navy-foreground">
+            <Link
+              to="/work"
+              className="text-sm font-semibold text-navy-muted transition-colors hover:text-navy-foreground"
+            >
               ← Selected Work
             </Link>
             <p className="eyebrow mt-8 text-[color-mix(in_oklab,var(--cyan)_85%,white)]">
@@ -227,11 +221,7 @@ function CasePage() {
                 <ArrowUpRight className="size-6 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
               </p>
             </a>
-            <Link
-              to="/work/$slug"
-              params={{ slug: next.slug }}
-              className="card-premium group rounded-2xl p-8 md:p-10"
-            >
+            <Link to={`/work/${next.slug}`} className="card-premium group rounded-2xl p-8 md:p-10">
               <p className="eyebrow text-muted-foreground">Next Project</p>
               <p className="mt-4 flex items-center justify-between text-3xl font-semibold">
                 {next.name}
@@ -246,4 +236,24 @@ function CasePage() {
       <Footer />
     </div>
   );
+}
+
+export function WorkDetailPage() {
+  const { slug } = useParams<{ slug: string }>();
+
+  // Redirect legacy /work/gabrulooks -> /work/gabru-looks
+  if (slug === "gabrulooks") {
+    return <Navigate to="/work/gabru-looks" replace />;
+  }
+
+  const c = slug ? caseStudies[slug as CaseStudy["slug"]] : undefined;
+
+  if (!c) {
+    return <NotFoundPage />;
+  }
+
+  const next: CaseStudy =
+    c.slug === "scalvea" ? caseStudies["gabru-looks"] : caseStudies["scalvea"];
+
+  return <WorkDetailContent c={c} next={next} />;
 }

@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Wordmark, Mark } from "./Brand";
@@ -7,6 +7,7 @@ import { nav } from "@/data/site";
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -34,16 +35,20 @@ export function Nav() {
         </Link>
 
         <div className="hidden items-center gap-9 md:flex">
-          {nav.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className="link-underline text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-              activeProps={{ className: "text-foreground" }}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {nav.map((item) => {
+            const isActive = location.pathname === item.to;
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`link-underline text-sm font-medium transition-colors hover:text-foreground ${
+                  isActive ? "text-foreground font-semibold" : "text-muted-foreground"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </div>
 
         <div className="hidden md:block">

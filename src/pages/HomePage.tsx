@@ -1,11 +1,20 @@
-import { pageHead } from "@/lib/seo";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "motion/react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { Nav } from "@/components/site/Nav";
+import { Footer } from "@/components/site/Footer";
+import { Reveal } from "@/components/site/Reveal";
+import { CtaSection } from "@/components/site/CtaSection";
+import { HeroVisual } from "@/components/site/HeroVisual";
 import { TechStack } from "@/components/site/TechStack";
 import { BrandTrust } from "@/components/site/BrandTrust";
 import { SelectedWork } from "@/components/site/SelectedWork";
 import { WhatWeDo } from "@/components/site/WhatWeDo";
 import { DataPulses } from "@/components/site/DataPulses";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { solutions } from "@/data/services";
+import { site, processSteps, insights } from "@/data/site";
+import { useSEO, getSiteUrl, absoluteUrl } from "@/lib/seo";
 
 const LINE1 = "Build what's next.";
 const LINE2 = "Grow what matters.";
@@ -36,103 +45,57 @@ function TypedHeadline() {
     </h1>
   );
 }
-import { motion } from "motion/react";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { Nav } from "@/components/site/Nav";
-import { Footer } from "@/components/site/Footer";
-import { Reveal } from "@/components/site/Reveal";
-import { CtaSection } from "@/components/site/CtaSection";
-import { HeroVisual } from "@/components/site/HeroVisual";
-import { services, serviceCategories, solutions } from "@/data/services";
-import { site, projects, processSteps, insights } from "@/data/site";
 
-import { getSiteUrl, absoluteUrl } from "@/lib/seo";
+export function HomePage() {
+  const siteUrl = getSiteUrl();
 
-export const Route = createFileRoute("/")({
-  head: () => {
-    const siteUrl = getSiteUrl();
-    return {
-      ...pageHead({
-        title: "NxtQuik | Technology, Digital Transformation & Growth",
-        description:
-          "NxtQuik builds digital products, custom software, cloud solutions and growth systems that help ambitious businesses build, transform and grow.",
-        path: "/",
-      }),
-      scripts: [
+  useSEO({
+    title: "NxtQuik | Technology, Digital Transformation & Growth",
+    description:
+      "NxtQuik builds digital products, custom software, cloud solutions and growth systems that help ambitious businesses build, transform and grow.",
+    path: "/",
+    schema: {
+      "@context": "https://schema.org",
+      "@graph": [
         {
-          type: "application/ld+json",
-          children: JSON.stringify({
-            "@context": "https://schema.org",
-            "@graph": [
-              {
-                "@type": "WebSite",
-                "@id": `${siteUrl}/#website`,
-                url: siteUrl,
-                name: "NxtQuik",
-                description:
-                  "Technology, digital transformation and growth systems for modern businesses.",
-                publisher: {
-                  "@id": `${siteUrl}/#organization`,
-                },
-              },
-              {
-                "@type": ["Organization", "ProfessionalService"],
-                "@id": `${siteUrl}/#organization`,
-                name: "NxtQuik",
-                url: siteUrl,
-                logo: absoluteUrl("/apple-touch-icon.png"),
-                image: absoluteUrl("/og-image.png"),
-                email: "nxtquik@gmail.com",
-                telephone: "+91 94786 69360",
-                founder: {
-                  "@type": "Person",
-                  name: "Shubham Sonwal",
-                },
-                address: {
-                  "@type": "PostalAddress",
-                  addressLocality: "Patiala",
-                  addressRegion: "Punjab",
-                  addressCountry: "IN",
-                },
-                sameAs: [
-                  "https://www.linkedin.com/company/ugcnxtquik/",
-                  "https://www.instagram.com/nxtquik/",
-                ],
-              },
-            ],
-          }),
+          "@type": "WebSite",
+          "@id": `${siteUrl}/#website`,
+          url: siteUrl,
+          name: "NxtQuik",
+          description:
+            "Technology, digital transformation and growth systems for modern businesses.",
+          publisher: {
+            "@id": `${siteUrl}/#organization`,
+          },
+        },
+        {
+          "@type": ["Organization", "ProfessionalService"],
+          "@id": `${siteUrl}/#organization`,
+          name: "NxtQuik",
+          url: siteUrl,
+          logo: absoluteUrl("/apple-touch-icon.png"),
+          image: absoluteUrl("/og-image.png"),
+          email: "nxtquik@gmail.com",
+          telephone: "+91 94786 69360",
+          founder: {
+            "@type": "Person",
+            name: "Shubham Sonwal",
+          },
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: "Patiala",
+            addressRegion: "Punjab",
+            addressCountry: "IN",
+          },
+          sameAs: [
+            "https://www.linkedin.com/company/ugcnxtquik/",
+            "https://www.instagram.com/nxtquik/",
+          ],
         },
       ],
-    };
-  },
-  component: Home,
-});
+    },
+  });
 
-const pillars = [
-  {
-    key: "Build",
-    title: "Build",
-    sub: "Digital Products & Software",
-    body: "Websites, apps, platforms and custom software designed around the decisions your customers actually make.",
-    slug: "web-development",
-  },
-  {
-    key: "Transform",
-    title: "Transform",
-    sub: "Cloud & Digital Transformation",
-    body: "Modernise infrastructure, connect systems and automate the manual work between them.",
-    slug: "digital-transformation",
-  },
-  {
-    key: "Grow",
-    title: "Grow",
-    sub: "SEO & Digital Growth",
-    body: "Search visibility, campaigns and conversion systems that turn attention into qualified enquiries.",
-    slug: "seo",
-  },
-];
-
-function Home() {
   return (
     <div>
       <Nav />
@@ -206,8 +169,7 @@ function Home() {
             {solutions.map((s, i) => (
               <Reveal key={s.title} delay={(i % 3) * 0.07}>
                 <Link
-                  to="/services/$slug"
-                  params={{ slug: s.slug }}
+                  to={`/services/${s.slug}`}
                   className="card-premium group block h-full rounded-2xl p-7"
                 >
                   <h3 className="flex items-start justify-between gap-4 text-xl font-semibold">
@@ -299,11 +261,7 @@ function Home() {
                     </span>
                   ))}
                 </div>
-                <Link
-                  to="/services/$slug"
-                  params={{ slug: "seo" }}
-                  className="btn-base btn-primary mt-10"
-                >
+                <Link to="/services/seo" className="btn-base btn-primary mt-10">
                   Build My SEO Strategy <ArrowRight className="size-4" />
                 </Link>
               </Reveal>
@@ -329,8 +287,7 @@ function Home() {
                     ))}
                   </div>
                   <Link
-                    to="/services/$slug"
-                    params={{ slug: "lead-generation" }}
+                    to="/services/lead-generation"
                     className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[color-mix(in_oklab,var(--cyan)_85%,white)]"
                   >
                     Grow My Business <ArrowRight className="size-4" />

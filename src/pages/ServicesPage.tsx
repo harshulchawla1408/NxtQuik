@@ -1,5 +1,4 @@
-import { pageHead, breadcrumbs, getSiteUrl } from "@/lib/seo";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
@@ -7,40 +6,37 @@ import { Reveal } from "@/components/site/Reveal";
 import { PageHero } from "@/components/site/PageHero";
 import { CtaSection } from "@/components/site/CtaSection";
 import { services, serviceCategories } from "@/data/services";
+import { useSEO, getSiteUrl, breadcrumbs } from "@/lib/seo";
 
-export const Route = createFileRoute("/services/")({
-  head: () => ({
-    ...pageHead({
-      title: "Services & Capabilities — Web, App, Software, Cloud & SEO | NxtQuik",
-      description:
-        "Full-cycle digital product and growth services: custom web and app development, enterprise software, cloud solutions, technical SEO, and performance marketing.",
-      path: "/services",
-    }),
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
+export function ServicesPage() {
+  const siteUrl = getSiteUrl();
+
+  useSEO({
+    title: "Services & Capabilities — Web, App, Software, Cloud & SEO | NxtQuik",
+    description:
+      "Full-cycle digital product and growth services: custom web and app development, enterprise software, cloud solutions, technical SEO, and performance marketing.",
+    path: "/services",
+    schema: {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
           "@type": "ItemList",
           name: "NxtQuik Technology & Growth Services",
           itemListElement: services.map((s, idx) => ({
             "@type": "ListItem",
             position: idx + 1,
             name: s.name,
-            url: `${getSiteUrl()}/services/${s.slug}`,
+            url: `${siteUrl}/services/${s.slug}`,
           })),
-        }),
-      },
-      breadcrumbs([
-        { name: "Home", path: "/" },
-        { name: "Services", path: "/services" },
-      ]),
-    ],
-  }),
-  component: ServicesIndex,
-});
+        },
+        breadcrumbs([
+          { name: "Home", path: "/" },
+          { name: "Services", path: "/services" },
+        ]),
+      ],
+    },
+  });
 
-function ServicesIndex() {
   return (
     <div>
       <Nav />
@@ -68,8 +64,7 @@ function ServicesIndex() {
                   .map((s, i) => (
                     <Reveal key={s.slug} delay={(i % 3) * 0.06}>
                       <Link
-                        to="/services/$slug"
-                        params={{ slug: s.slug }}
+                        to={`/services/${s.slug}`}
                         className="card-premium group block h-full rounded-2xl p-7"
                       >
                         <h3 className="flex items-start justify-between gap-4 text-lg font-semibold">

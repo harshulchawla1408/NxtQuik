@@ -1,5 +1,3 @@
-import { pageHead, breadcrumbs, getSiteUrl } from "@/lib/seo";
-import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Mail, MapPin, Phone, ArrowRight, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
@@ -8,25 +6,71 @@ import { Footer } from "@/components/site/Footer";
 import { Reveal } from "@/components/site/Reveal";
 import { site } from "@/data/site";
 import { services } from "@/data/services";
-import { useServerFn } from "@tanstack/react-start";
-import { sendEnquiry as sendEnquiryFn } from "@/lib/contact.functions";
+import { useSEO, getSiteUrl, breadcrumbs } from "@/lib/seo";
 
-export const Route = createFileRoute("/contact")({
-  head: () => ({
-    ...pageHead({
-      title: "Contact NxtQuik — Start a Project | Web, Software & Growth",
-      description:
-        "Get in touch with NxtQuik. Email nxtquik@gmail.com, call +91 94786 69360, or submit your project brief for custom web, mobile, software or growth solutions.",
-      path: "/contact",
+const SUCCESS_MESSAGE =
+  "Thank you for reaching out to NxtQuik. We've received your enquiry and will get back to you shortly.";
+
+async function submitEnquiry(data: Record<string, string>) {
+  const webhookUrl = import.meta.env.VITE_CONTACT_WEBHOOK_URL as string | undefined;
+
+  // 1. If webhook configured, send to webhook
+  if (webhookUrl) {
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...data,
+        to: site.email,
+        timestamp: new Date().toISOString(),
+      }),
+    });
+    if (!res.ok) throw new Error("Webhook failed");
+    return;
+  }
+
+  // 2. Default static direct delivery to nxtquik@gmail.com
+  const res = await fetch("https://formsubmit.co/ajax/nxtquik@gmail.com", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      name: data["name"],
+      email: data["email"],
+      phone: data["phone"] || "Not provided",
+      company: data["company"] || "Not provided",
+      service: data["service"] || "General enquiry",
+      message: data["message"],
+      _subject: `New Project Enquiry — NxtQuik (${data["name"]}${data["service"] ? ` · ${data["service"]}` : ""})`,
+      _template: "table",
+      _captcha: "false",
     }),
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
+  });
+
+  if (!res.ok) {
+    throw new Error("Could not send enquiry");
+  }
+}
+
+export function ContactPage() {
+  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const siteUrl = getSiteUrl();
+
+  useSEO({
+    title: "Contact NxtQuik — Start a Project | Web, Software & Growth",
+    description:
+      "Get in touch with NxtQuik. Email nxtquik@gmail.com, call +91 94786 69360, or submit your project brief for custom web, mobile, software or growth solutions.",
+    path: "/contact",
+    schema: {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
           "@type": "ContactPage",
           name: "Contact NxtQuik",
-          url: `${getSiteUrl()}/contact`,
+          url: `${siteUrl}/contact`,
           description:
             "Start a technology, software, cloud or digital growth project with NxtQuik.",
           mainEntity: {
@@ -41,24 +85,14 @@ export const Route = createFileRoute("/contact")({
               addressCountry: "IN",
             },
           },
-        }),
-      },
-      breadcrumbs([
-        { name: "Home", path: "/" },
-        { name: "Contact", path: "/contact" },
-      ]),
-    ],
-  }),
-  component: Contact,
-});
-
-const SUCCESS_MESSAGE =
-  "Thank you for reaching out to NxtQuik. We've received your enquiry and will get back to you shortly.";
-
-function Contact() {
-  const [sent, setSent] = useState(false);
-  const [sending, setSending] = useState(false);
-  const sendEnquiry = useServerFn(sendEnquiryFn);
+        },
+        breadcrumbs([
+          { name: "Home", path: "/" },
+          { name: "Contact", path: "/contact" },
+        ]),
+      ],
+    },
+  });
 
   return (
     <div>
@@ -189,7 +223,7 @@ function Contact() {
 
                       setSending(true);
                       try {
-                        await sendEnquiry({ data: fd });
+                        await submitEnquiry(fd);
                         setSent(true);
                         form.reset();
                         toast.success(SUCCESS_MESSAGE);
@@ -219,7 +253,11 @@ function Contact() {
                         type="tel"
                         placeholder="+91 94786 69360"
                       />
-                      <Field label="Company / Organisation" name="company" placeholder="Company Ltd" />
+                      <Field
+                        label="Company / Organisation"
+                        name="company"
+                        placeholder="Company Ltd"
+                      />
                     </div>
                     <div>
                       <label htmlFor="service" className="text-sm font-medium">
@@ -261,7 +299,8 @@ function Contact() {
                       <ArrowRight className="size-4" />
                     </button>
                     <p className="text-center text-xs text-muted-foreground">
-                      We respond directly within one business day. Your data is kept strictly confidential.
+                      We respond directly within one business day. Your data is kept strictly
+                      confidential.
                     </p>
                   </form>
                 )}

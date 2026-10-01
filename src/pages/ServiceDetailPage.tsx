@@ -1,56 +1,40 @@
-import { serviceAliases, serviceTitles } from "@/data/services";
-import { pageHead, breadcrumbs, serviceSchema } from "@/lib/seo";
-import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
+import { useParams, Navigate, Link } from "react-router-dom";
 import { ArrowRight, Check } from "lucide-react";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { Reveal } from "@/components/site/Reveal";
 import { CtaSection } from "@/components/site/CtaSection";
-import { services } from "@/data/services";
+import { services, serviceAliases, serviceTitles, type Service } from "@/data/services";
 import { projects } from "@/data/site";
+import { useSEO, serviceSchema, breadcrumbs } from "@/lib/seo";
+import { NotFoundPage } from "./NotFoundPage";
 
-export const Route = createFileRoute("/services/$slug")({
-  loader: ({ params }) => {
-    const alias = serviceAliases[params.slug];
-    if (alias) throw redirect({ to: "/services/$slug", params: { slug: alias }, statusCode: 301 });
-    const service = services.find((s) => s.slug === params.slug);
-    if (!service) throw notFound();
-    return service;
-  },
-  head: ({ loaderData, params }) => {
-    if (!loaderData)
-      return {
-        meta: [{ title: "Service not found | NxtQuik" }, { name: "robots", content: "noindex" }],
-      };
-    const path = `/services/${params.slug}`;
-    const title = serviceTitles[loaderData.slug] ?? `${loaderData.name} Services | NxtQuik`;
-    const description = `${loaderData.headline} ${loaderData.solution}`.slice(0, 158);
-    return {
-      ...pageHead({
-        title,
-        description,
-        path,
-      }),
-      scripts: [
+function ServiceDetailContent({ s }: { s: Service }) {
+  const path = `/services/${s.slug}`;
+  const title = serviceTitles[s.slug] ?? `${s.name} Services | NxtQuik`;
+  const description = `${s.headline} ${s.solution}`.slice(0, 158);
+
+  useSEO({
+    title,
+    description,
+    path,
+    schema: {
+      "@context": "https://schema.org",
+      "@graph": [
         serviceSchema({
-          name: loaderData.name,
-          description: loaderData.solution,
+          name: s.name,
+          description: s.solution,
           path,
-          category: loaderData.category,
+          category: s.category,
         }),
         breadcrumbs([
           { name: "Home", path: "/" },
           { name: "Services", path: "/services" },
-          { name: loaderData.name, path },
+          { name: s.name, path },
         ]),
       ],
-    };
-  },
-  component: ServicePage,
-});
-
-function ServicePage() {
-  const s = Route.useLoaderData();
+    },
+  });
 
   return (
     <div>
@@ -152,8 +136,7 @@ function ServicePage() {
               {projects.map((p) => (
                 <Link
                   key={p.slug}
-                  to="/work/$slug"
-                  params={{ slug: p.slug }}
+                  to={`/work/${p.slug}`}
                   className="card-premium block rounded-2xl p-8"
                 >
                   <p className="eyebrow text-muted-foreground">{p.categories.join(" · ")}</p>
@@ -189,4 +172,21 @@ function ServicePage() {
       <Footer />
     </div>
   );
+}
+
+export function ServiceDetailPage() {
+  const { slug } = useParams<{ slug: string }>();
+
+  // Handle service aliases (e.g. /services/development -> /services/web-development)
+  if (slug && serviceAliases[slug]) {
+    return <Navigate to={`/services/${serviceAliases[slug]}`} replace />;
+  }
+
+  const s = services.find((srv) => srv.slug === slug);
+
+  if (!s) {
+    return <NotFoundPage />;
+  }
+
+  return <ServiceDetailContent s={s} />;
 }

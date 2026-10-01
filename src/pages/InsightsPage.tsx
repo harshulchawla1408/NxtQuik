@@ -1,42 +1,37 @@
-import { pageHead, breadcrumbs, getSiteUrl } from "@/lib/seo";
-import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { Reveal } from "@/components/site/Reveal";
 import { PageHero } from "@/components/site/PageHero";
 import { CtaSection } from "@/components/site/CtaSection";
 import { insights } from "@/data/site";
+import { useSEO, getSiteUrl, breadcrumbs } from "@/lib/seo";
 
-export const Route = createFileRoute("/insights")({
-  head: () => ({
-    ...pageHead({
-      title: "Technology & Growth Insights — Architecture, Cloud, SEO | NxtQuik",
-      description:
-        "Practical engineering and growth insights on web development, custom software, cloud solutions, conversion optimization, and lead generation.",
-      path: "/insights",
-    }),
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
+export function InsightsPage() {
+  const siteUrl = getSiteUrl();
+
+  useSEO({
+    title: "Technology & Growth Insights — Architecture, Cloud, SEO | NxtQuik",
+    description:
+      "Practical engineering and growth insights on web development, custom software, cloud solutions, conversion optimization, and lead generation.",
+    path: "/insights",
+    schema: {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
           "@type": "Blog",
           name: "NxtQuik Insights",
-          url: `${getSiteUrl()}/insights`,
+          url: `${siteUrl}/insights`,
           description:
             "Practical notes on technology, cloud architecture, software engineering, and digital growth from the NxtQuik team.",
-        }),
-      },
-      breadcrumbs([
-        { name: "Home", path: "/" },
-        { name: "Insights", path: "/insights" },
-      ]),
-    ],
-  }),
-  component: Insights,
-});
+        },
+        breadcrumbs([
+          { name: "Home", path: "/" },
+          { name: "Insights", path: "/insights" },
+        ]),
+      ],
+    },
+  });
 
-function Insights() {
   return (
     <div>
       <Nav />

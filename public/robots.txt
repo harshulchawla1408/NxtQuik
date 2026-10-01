@@ -1,6 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /_serverFn/
 
-Sitemap: https://nxtquik.com/sitemap.xml
-
+Sitemap: https://www.nxtquik.com/sitemap.xml

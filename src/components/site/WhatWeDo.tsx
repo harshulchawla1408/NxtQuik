@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
 
@@ -345,7 +345,7 @@ export function WhatWeDo() {
                   return (
                     <li key={r.name}>
                       {r.slug ? (
-                        <Link to="/services/$slug" params={{ slug: r.slug }} className={cls}>
+                        <Link to={`/services/${r.slug}`} className={cls}>
                           {inner}
                         </Link>
                       ) : (

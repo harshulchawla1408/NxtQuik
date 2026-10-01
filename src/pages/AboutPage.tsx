@@ -1,5 +1,3 @@
-import { pageHead, breadcrumbs, getSiteUrl } from "@/lib/seo";
-import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { Reveal } from "@/components/site/Reveal";
@@ -8,23 +6,23 @@ import { CtaSection } from "@/components/site/CtaSection";
 import { OfficeInProgress } from "@/components/site/OfficeInProgress";
 import { Mark } from "@/components/site/Brand";
 import { site, processSteps } from "@/data/site";
+import { useSEO, getSiteUrl, breadcrumbs } from "@/lib/seo";
 
-export const Route = createFileRoute("/about")({
-  head: () => ({
-    ...pageHead({
-      title: "About NxtQuik — Technology, Engineering & Growth Company",
-      description:
-        "NxtQuik is a technology, digital transformation and growth agency from Patiala, founded by Shubham Sonwal, building scalable software, cloud systems and digital products.",
-      path: "/about",
-    }),
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
+export function AboutPage() {
+  const siteUrl = getSiteUrl();
+
+  useSEO({
+    title: "About NxtQuik — Technology, Engineering & Growth Company",
+    description:
+      "NxtQuik is a technology, digital transformation and growth agency from Patiala, founded by Shubham Sonwal, building scalable software, cloud systems and digital products.",
+    path: "/about",
+    schema: {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
           "@type": "AboutPage",
           name: "About NxtQuik",
-          url: `${getSiteUrl()}/about`,
+          url: `${siteUrl}/about`,
           description:
             "NxtQuik helps businesses use technology, custom engineering and digital growth strategies to build scalable operations.",
           mainEntity: {
@@ -40,18 +38,15 @@ export const Route = createFileRoute("/about")({
               addressCountry: "IN",
             },
           },
-        }),
-      },
-      breadcrumbs([
-        { name: "Home", path: "/" },
-        { name: "About", path: "/about" },
-      ]),
-    ],
-  }),
-  component: About,
-});
+        },
+        breadcrumbs([
+          { name: "Home", path: "/" },
+          { name: "About", path: "/about" },
+        ]),
+      ],
+    },
+  });
 
-function About() {
   return (
     <div>
       <Nav />
